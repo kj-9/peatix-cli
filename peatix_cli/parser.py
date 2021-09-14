@@ -17,4 +17,12 @@ parser.add_argument(
     '--max_page',
     type=int,
     default=30,
-    help='miximum number of pages to featch results')
+    help='miximum number of pages to featch results,  (default: %(default)s)')
+
+parser.add_argument(
+    '--filter',
+    type=str,
+    choices=['today', 'this_weekend', 'next_week', ''],
+    default='this_weekend',
+    help='filter to date of event, set \'\' to not to filter, (default: %(default)s)'
+)
