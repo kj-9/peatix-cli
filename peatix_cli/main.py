@@ -49,7 +49,7 @@ class Main():
 
     def _els_generator(self):
 
-        url = 'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=2&size=10&v=3.4&tag_ids=2796&online=1&dr=today'
+        url = 'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=1&size=10&v=3.4&tag_ids=2796&online=1&dr=this_weekend'
         target_selector = '#results-table > div.event-search-results.col-main > ul > li'
         next_selector = '#app > div > ul > li.next'
 
@@ -108,7 +108,6 @@ class Main():
                     texts.get('event-thumb_organizer').removeprefix("主催: "),
                     f"[link={href}]->[/link]"
                 ])
-            break
 
         log.info("finish fetcing results")
         self.driver.quit()
@@ -125,7 +124,7 @@ class Main():
         table.add_column("Link", justify="center")
 
         out = sorted(out, key=lambda i_out: datetime.strptime(
-            i_out[0] + i_out[2], '%m/%d%H:%M'))
+            i_out[0] + ' ' + i_out[2], '%m/%d %H:%M'))
 
         for i_out in out:
             table.add_row(*i_out)
