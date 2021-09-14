@@ -1,9 +1,13 @@
 from pathlib import Path
+
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+
+from rich.console import Console
+from rich.table import Table
 
 
 class Main():
@@ -32,7 +36,7 @@ class Main():
             'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
         return op
 
-    def _page_generator(self):
+    def _els_generator(self):
         while True:
             WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located(
@@ -60,7 +64,12 @@ class Main():
             'month', 'day', 'datetime', 'event-thumb_name', 'event-thumb_organizer'
         ]
 
-        for els in self._page_generator():
+        out = []
+
+        for i, els in enumerate(self._els_generator()):
+
+            print(i)
+
             for el in els:
 
                 texts = {k: el.find_element_by_class_name(
@@ -68,16 +77,27 @@ class Main():
 
                 doy, time = texts.get('datetime').split(" ")[:2]
 
-                date = f"{texts.get('month')}{texts.get('day')}日({doy[0]}){time}"
+                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')}/({doy[0]}) {time}"
 
-                print(*[
+                out.append([
                     date,
                     texts.get('event-thumb_name'),
                     texts.get('event-thumb_organizer').removeprefix("主催: "),
-                ], sep='\t', end='\n'
-                )
+                ])
 
         self.driver.quit()
+
+        table = Table(title="Peatix Search Result")
+
+        table.add_column("Date")
+        table.add_column("Name")
+        table.add_column("Organizer")
+
+        for i_out in out:
+            table.add_row(*i_out)
+
+        console = Console()
+        console.print(table)
 
 
 if __name__ == "__main__":
