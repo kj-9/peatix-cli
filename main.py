@@ -1,6 +1,6 @@
 import sys
 import logging
-
+from datetime import datetime
 from pathlib import Path
 
 from selenium import webdriver
@@ -95,17 +95,20 @@ class Main():
 
                 doy, time = texts.get('datetime').split(" ")[:2]
 
-                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')} {doy[0]} {time}"
+                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')}"
 
                 href = el.find_element_by_class_name(
                     "event-thumb_link").get_attribute("href")
 
                 out.append([
                     date,
+                    doy[0],
+                    time,
                     texts.get('event-thumb_name'),
                     texts.get('event-thumb_organizer').removeprefix("主催: "),
                     f"[link={href}]->[/link]"
                 ])
+            break
 
         log.info("finish fetcing results")
         self.driver.quit()
@@ -114,12 +117,15 @@ class Main():
 
         table = Table(title="Peatix Search Result")
 
-        table.add_column("Date")
+        table.add_column("Date", justify="center")
+        table.add_column("DOW", justify="center")
+        table.add_column("Time", justify="right")
         table.add_column("Name", overflow="fold")
         table.add_column("Organizer")
-        table.add_column("Link")
+        table.add_column("Link", justify="center")
 
-        out = sorted(out, key=lambda i_out: i_out[0])
+        out = sorted(out, key=lambda i_out: datetime.strptime(
+            i_out[0] + i_out[2], '%m/%d%H:%M'))
 
         for i_out in out:
             table.add_row(*i_out)
