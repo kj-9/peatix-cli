@@ -1,4 +1,6 @@
 import sys
+import logging
+
 from pathlib import Path
 
 from selenium import webdriver
@@ -9,25 +11,28 @@ from selenium.webdriver.chrome.options import Options
 
 from rich.console import Console
 from rich.table import Table
+from rich.logging import RichHandler
 
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+logging.basicConfig(
+    level="INFO",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)]
+)
+
+log = logging.getLogger("rich")
+
 
 class Main():
 
-    url = 'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=2&size=10&v=3.4&tag_ids=2796&online=1&dr=today'
-    chromedriver_path = 'C:/Users/kh03/Desktop/chromedriver_win32/chromedriver.exe'
-    target_selector = '#results-table > div.event-search-results.col-main > ul > li'
-    next_selector = '#app > div > ul > li.next'
-    chromedriver = Path(chromedriver_path)
-
     def __init__(self):
 
-        self.driver = webdriver.Chrome(self.chromedriver.resolve(),
-                                       options=self._set_option())
+        chromedriver_path = 'C:/Users/kh03/Desktop/chromedriver_win32/chromedriver.exe'
+        chromedriver = Path(chromedriver_path)
 
-    def _set_option(self):
         op = Options()
 
         op.add_argument("--disable-gpu")
@@ -38,22 +43,31 @@ class Main():
         op.add_argument("--headless")
         op.add_argument(
             'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
-        return op
+
+        self.driver = webdriver.Chrome(chromedriver.resolve(),
+                                       options=op)
 
     def _els_generator(self):
+
+        url = 'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=2&size=10&v=3.4&tag_ids=2796&online=1&dr=today'
+        target_selector = '#results-table > div.event-search-results.col-main > ul > li'
+        next_selector = '#app > div > ul > li.next'
+
+        self.driver.get(url)
+
         while True:
             WebDriverWait(self.driver, 5).until(
                 EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, self.target_selector))
+                    (By.CSS_SELECTOR, target_selector))
             )
 
             els = self.driver.find_elements_by_css_selector(
-                self.target_selector)
+                target_selector)
 
             yield els
 
             next_el = self.driver.find_element_by_css_selector(
-                self.next_selector)
+                next_selector)
 
             if next_el.is_displayed():
                 next_el.click()
@@ -62,17 +76,17 @@ class Main():
 
     def run(self):
 
-        self.driver.get(self.url)
-
         class_names = [
             'month', 'day', 'datetime', 'event-thumb_name', 'event-thumb_organizer'
         ]
 
         out = []
 
+        log.info("start fetcing results...")
+
         for i, els in enumerate(self._els_generator()):
 
-            print(i)
+            log.info(f"fetcing page {i+1}...")
 
             for el in els:
 
@@ -81,21 +95,31 @@ class Main():
 
                 doy, time = texts.get('datetime').split(" ")[:2]
 
-                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')}/({doy[0]}) {time}"
+                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')} {doy[0]} {time}"
+
+                href = el.find_element_by_class_name(
+                    "event-thumb_link").get_attribute("href")
 
                 out.append([
                     date,
                     texts.get('event-thumb_name'),
                     texts.get('event-thumb_organizer').removeprefix("主催: "),
+                    f"[link={href}]->[/link]"
                 ])
 
+        log.info("finish fetcing results")
         self.driver.quit()
+
+        log.info("stopped driver")
 
         table = Table(title="Peatix Search Result")
 
         table.add_column("Date")
-        table.add_column("Name")
+        table.add_column("Name", overflow="fold")
         table.add_column("Organizer")
+        table.add_column("Link")
+
+        out = sorted(out, key=lambda i_out: i_out[0])
 
         for i_out in out:
             table.add_row(*i_out)
