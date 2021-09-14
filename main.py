@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from selenium import webdriver
@@ -8,6 +9,9 @@ from selenium.webdriver.chrome.options import Options
 
 from rich.console import Console
 from rich.table import Table
+
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 class Main():
