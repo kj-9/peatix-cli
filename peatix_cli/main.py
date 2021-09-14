@@ -13,6 +13,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.logging import RichHandler
 
+from peatix_cli.parser import parser
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -28,10 +29,11 @@ log = logging.getLogger("rich")
 
 class Main():
 
-    def __init__(self):
+    def __init__(self, args):
 
-        chromedriver_path = 'C:/Users/kh03/Desktop/chromedriver_win32/chromedriver.exe'
-        chromedriver = Path(chromedriver_path)
+        self.args = args
+
+        chromedriver = Path(self.args.chromedriver)
 
         op = Options()
 
@@ -82,7 +84,8 @@ class Main():
 
         out = []
 
-        log.info("start fetcing results...")
+        log.info(
+            f"start fetcing results until {self.args.max_page} pages at max...")
 
         for i, els in enumerate(self._els_generator()):
 
@@ -131,7 +134,3 @@ class Main():
 
         console = Console()
         console.print(table)
-
-
-if __name__ == "__main__":
-    Main().run()
