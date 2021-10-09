@@ -1,4 +1,5 @@
 import sys
+import re
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -12,8 +13,6 @@ from selenium.webdriver.chrome.options import Options
 from rich.console import Console
 from rich.table import Table
 from rich.logging import RichHandler
-
-from peatix_cli.parser import parser
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -99,11 +98,13 @@ class Main():
                 texts = {k: el.find_element_by_class_name(
                     k).text for k in class_names}
 
+                date = f"{re.sub('月', '', texts.get('month'))}/{texts.get('day')}"
                 doy, time = texts.get('datetime').split(" ")[:2]
-                date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')}"
 
                 href = el.find_element_by_class_name(
                     "event-thumb_link").get_attribute("href")
+                # this part of href is enough to access event pages
+                link = re.sub('\?utm.+$', '', href)
 
                 out.append([
                     date,
@@ -111,7 +112,7 @@ class Main():
                     time,
                     texts.get('event-thumb_name'),
                     texts.get('event-thumb_organizer').removeprefix("主催: "),
-                    f"[link={href}]->[/link]"
+                    link if self.args.show_link else f"[link={link}]->[/link]"
                 ])
 
             if (i+1) == self.args.max_page:
@@ -130,7 +131,12 @@ class Main():
         table.add_column("Time", justify="right")
         table.add_column("Name", overflow="fold")
         table.add_column("Organizer")
-        table.add_column("Link", justify="center")
+
+        if self.args.show_link:
+            table.add_column("Link", justify="left", overflow="fold")
+        else:
+            table.add_column("Link", justify="center")
+
         out = sorted(out, key=lambda i_out: datetime.strptime(
             i_out[0] + ' ' + i_out[2], '%m/%d %H:%M'))
 

@@ -26,3 +26,8 @@ parser.add_argument(
     default='this_weekend',
     help='filter to date of event, set \'\' to not to filter, (default: %(default)s)'
 )
+
+parser.add_argument(
+    '--show_link',
+    action='store_true',
+    help='if this flag is set, show a bare url link instead of an embedded link')
