@@ -47,13 +47,21 @@ class Main():
         chrome_options.add_experimental_option(
             'prefs', {'intl.accept_languages': 'ja'})
 
-        self.driver = webdriver.Chrome(Path(self.args.chromedriver).resolve(),
-                                       options=options,
-                                       chrome_options=chrome_options)
+        if self.args.chromedriver:
+            self.driver = webdriver.Chrome(
+                Path(self.args.chromedriver).resolve(),
+                options=options,
+                chrome_options=chrome_options)
+        else:
+            self.driver = webdriver.Chrome(
+                options=options,
+                chrome_options=chrome_options)
 
     def __del__(self):
-        self.driver.quit()
-        log.info("stopped chromedriver")
+
+        if hasattr(self, "driver"):
+            self.driver.quit()
+            log.info("stopped chromedriver")
 
     def _els_generator(self):
 

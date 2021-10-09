@@ -9,8 +9,8 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument(
     '--chromedriver',
-    required=True,
     type=Path,
+    default=None,
     help='path to chromedriver executable')
 
 parser.add_argument(
