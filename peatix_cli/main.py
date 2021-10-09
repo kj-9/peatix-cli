@@ -51,6 +51,10 @@ class Main():
                                        options=options,
                                        chrome_options=chrome_options)
 
+    def __del__(self):
+        self.driver.quit()
+        log.info("stopped chromedriver")
+
     def _els_generator(self):
 
         url = f'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=1&size=10&v=3.4&tag_ids=2796&online=1&dr={self.args.filter}'
@@ -120,9 +124,6 @@ class Main():
                 break
 
         log.info("finish fetcing results")
-        self.driver.quit()
-
-        log.info("stopped driver")
 
         table = Table(title="Peatix Search Result")
 
