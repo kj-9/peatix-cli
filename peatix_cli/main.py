@@ -131,7 +131,6 @@ class Main():
         table.add_column("Name", overflow="fold")
         table.add_column("Organizer")
         table.add_column("Link", justify="center")
-        print(out)
         out = sorted(out, key=lambda i_out: datetime.strptime(
             i_out[0] + ' ' + i_out[2], '%m/%d %H:%M'))
 
