@@ -114,7 +114,7 @@ class Main():
                     f"[link={href}]->[/link]"
                 ])
 
-            if i == self.args.max_page:
+            if (i+1) == self.args.max_page:
                 log.info("reached max page.")
                 break
 
