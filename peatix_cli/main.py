@@ -33,21 +33,24 @@ class Main():
 
         self.args = args
 
-        chromedriver = Path(self.args.chromedriver)
+        options = Options()
 
-        op = Options()
-
-        op.add_argument("--disable-gpu")
-        op.add_argument("--disable-extensions")
-        op.add_argument("--proxy-server='direct://'")
-        op.add_argument("--proxy-bypass-list=*")
-        op.add_argument("--start-maximized")
-        op.add_argument("--headless")
-        op.add_argument(
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--proxy-server='direct://'")
+        options.add_argument("--proxy-bypass-list=*")
+        options.add_argument("--start-maximized")
+        options.add_argument("--headless")
+        options.add_argument(
             'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
 
-        self.driver = webdriver.Chrome(chromedriver.resolve(),
-                                       options=op)
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_experimental_option(
+            'prefs', {'intl.accept_languages': 'ja'})
+
+        self.driver = webdriver.Chrome(Path(self.args.chromedriver).resolve(),
+                                       options=options,
+                                       chrome_options=chrome_options)
 
     def _els_generator(self):
 
@@ -97,7 +100,6 @@ class Main():
                     k).text for k in class_names}
 
                 doy, time = texts.get('datetime').split(" ")[:2]
-
                 date = f"{texts.get('month').removesuffix('月')}/{texts.get('day')}"
 
                 href = el.find_element_by_class_name(
@@ -129,7 +131,7 @@ class Main():
         table.add_column("Name", overflow="fold")
         table.add_column("Organizer")
         table.add_column("Link", justify="center")
-
+        print(out)
         out = sorted(out, key=lambda i_out: datetime.strptime(
             i_out[0] + ' ' + i_out[2], '%m/%d %H:%M'))
 
