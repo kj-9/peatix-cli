@@ -4,11 +4,14 @@ Command line tool to search and featch [peatix](https://peatix.com/) events and 
 
 # Install
 
-You need Google Chrome installed and [chromedriver](https://sites.google.com/chromium.org/driver/downloads) executable.
+
+1. You need Google Chrome installed.
+2. You need [chromedriver](https://sites.google.com/chromium.org/driver/downloads) executable installed. (You can also specify the path to chromedriver executable by the `--chromedriver` argument from cli.)
+
 
 ## Build from source
 
-Crone this repo, and
+Crone this repo, and run:
 
 ```bash
 pip install --upgrade setuptools build
