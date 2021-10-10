@@ -1,67 +1,17 @@
-import sys
 import re
-import logging
 from datetime import datetime
-from pathlib import Path
 
-from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
 
 from rich.console import Console
 from rich.table import Table
-from rich.logging import RichHandler
 
-sys.stdout.reconfigure(encoding='utf-8')
-
-logging.basicConfig(
-    level="INFO",
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(rich_tracebacks=True)]
-)
-
-log = logging.getLogger("rich")
+from peatix_cli.command.root import RootCmd, logger
 
 
-class Main():
-
-    def __init__(self, args):
-
-        self.args = args
-
-        options = Options()
-
-        options.add_argument("--disable-gpu")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--proxy-server='direct://'")
-        options.add_argument("--proxy-bypass-list=*")
-        options.add_argument("--start-maximized")
-        options.add_argument("--headless")
-        options.add_argument(
-            'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.79 Safari/537.36')
-
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_experimental_option(
-            'prefs', {'intl.accept_languages': 'ja'})
-
-        if self.args.chromedriver:
-            self.driver = webdriver.Chrome(
-                Path(self.args.chromedriver).resolve(),
-                options=options,
-                chrome_options=chrome_options)
-        else:
-            self.driver = webdriver.Chrome(
-                options=options,
-                chrome_options=chrome_options)
-
-    def __del__(self):
-
-        if hasattr(self, "driver"):
-            self.driver.quit()
-            log.info("stopped chromedriver")
+class SearchCmd(RootCmd):
 
     def _els_generator(self):
 
@@ -98,12 +48,12 @@ class Main():
 
         out = []
 
-        log.info(
+        logger.info(
             f"start fetcing results until {self.args.max_page} pages at max...")
 
         for i, els in enumerate(self._els_generator()):
 
-            log.info(f"fetcing page {i+1}...")
+            logger.info(f"fetcing page {i+1}...")
 
             for el in els:
 
@@ -128,10 +78,10 @@ class Main():
                 ])
 
             if (i+1) == self.args.max_page:
-                log.info("reached max page.")
+                logger.info("reached max page.")
                 break
 
-        log.info("finish fetcing results")
+        logger.info("finish fetcing results")
 
         table = Table(title="Peatix Search Result")
 
