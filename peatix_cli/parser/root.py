@@ -29,17 +29,23 @@ parser_search.add_argument(
     help='miximum number of pages to featch results,  (default: %(default)s)')
 
 parser_search.add_argument(
-    '--filter',
+    '--period',
     type=str,
     choices=['today', 'this_weekend', 'next_week', ''],
     default='this_weekend',
-    help='filter to date of event, set \'\' to not to filter, (default: %(default)s)'
+    help='filter if date of events is in period, set \'\' to not to filter, (default: %(default)s)'
 )
 
 parser_search.add_argument(
     '--show_link',
     action='store_true',
     help='if this flag is set, show a bare url link instead of an embedded link')
+
+parser_search.add_argument(
+    '--tag_id',
+    type=int,
+    default=None,
+    help='filter by tag_id')
 
 
 def run(args):
