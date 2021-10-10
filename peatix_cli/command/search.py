@@ -13,7 +13,7 @@ from peatix_cli.command.root import RootCmd, logger
 
 class SearchCmd(RootCmd):
 
-    def _els_generator(self):
+    def _next_page(self):
 
         url = f'https://peatix.com/search?country=JP&l.text=%E3%81%99%E3%81%B9%E3%81%A6%E3%81%AE%E5%A0%B4%E6%89%80&p=1&size=10&v=3.4&tag_ids=2796&online=1&dr={self.args.filter}'
         target_selector = '#results-table > div.event-search-results.col-main > ul > li'
@@ -51,7 +51,7 @@ class SearchCmd(RootCmd):
         logger.info(
             f"start fetcing results until {self.args.max_page} pages at max...")
 
-        for i, els in enumerate(self._els_generator()):
+        for i, els in enumerate(self._next_page()):
 
             logger.info(f"fetcing page {i+1}...")
 
