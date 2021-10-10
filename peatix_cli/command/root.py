@@ -40,6 +40,7 @@ class RootCmd():
         chrome_options.add_experimental_option(
             'prefs', {'intl.accept_languages': 'ja'})
 
+        logger.info("starting chromedriver")
         if self.args.chromedriver:
             self.driver = webdriver.Chrome(
                 Path(self.args.chromedriver).resolve(),
