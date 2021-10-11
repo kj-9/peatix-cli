@@ -8,41 +8,47 @@ from selenium.webdriver.support import expected_conditions as EC
 from rich.console import Console
 from rich.table import Table
 
-from peatix_cli.command.root import RootCmd, logger
+from peatix_cli.command.root import ChromeDriverCmd, logger
 
 
-class SearchCmd(RootCmd):
+class SearchCmd(ChromeDriverCmd):
 
-    def _next_page(self):
+    def _page_els_generator(self):
 
-        url = f'https://peatix.com/search?country=JP&p=1&size=10&v=3.4&tag_ids={"" if self.args.tag_id is None else self.args.tag_id}&online=1&dr={self.args.period}'
-        target_selector = '#results-table > div.event-search-results.col-main > ul > li'
-        next_selector = '#app > div > ul > li.next'
+        url = f'https://peatix.com/search?country=JP&v=3.4&tag_ids={self.args.tag_id}&online=1&dr={self.args.period}'
+
+        selector_target = '#results-table > div.event-search-results.col-main > ul > li'
+        selector_next = '#app > div > ul > li.next'
+
+        timeout = 5
 
         logger.info(f'fetching url: {url}')
 
         self.driver.get(url)
 
         while True:
-            WebDriverWait(self.driver, 5).until(
+            WebDriverWait(self.driver, timeout).until(
                 EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, target_selector))
+                    (By.CSS_SELECTOR, selector_target))
             )
 
-            els = self.driver.find_elements_by_css_selector(
-                target_selector)
+            page_els = self.driver.find_elements_by_css_selector(
+                selector_target)
 
-            yield els
+            yield page_els
 
-            next_el = self.driver.find_element_by_css_selector(
-                next_selector)
+            el_next = self.driver.find_element_by_css_selector(
+                selector_next)
 
-            if next_el.is_displayed():
-                next_el.click()
+            if el_next.is_displayed():
+                el_next.click()
             else:
                 break
 
     def run(self):
+
+        logger.info(
+            f"start fetcing results until {self.args.max_page} pages at max...")
 
         class_names = [
             'month', 'day', 'datetime', 'event-thumb_name', 'event-thumb_organizer'
@@ -50,10 +56,7 @@ class SearchCmd(RootCmd):
 
         out = []
 
-        logger.info(
-            f"start fetcing results until {self.args.max_page} pages at max...")
-
-        for i, els in enumerate(self._next_page()):
+        for i, els in enumerate(self._page_els_generator()):
 
             logger.info(f"fetcing page {i+1}...")
 

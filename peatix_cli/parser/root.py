@@ -44,8 +44,8 @@ parser_search.add_argument(
 parser_search.add_argument(
     '--tag_id',
     type=int,
-    default=None,
-    help='filter by tag_id')
+    default='',
+    help='filter by tag_id, , set \'\' to not to filter, (default: %(default)s)')
 
 
 def run(args):

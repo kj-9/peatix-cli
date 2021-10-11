@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger("rich")
 
 
-class RootCmd():
+class ChromeDriverCmd():
 
     def __init__(self, args):
 
